@@ -166,7 +166,9 @@ def initialize_client_with_cluster(cluster_info: ClusterInfo = None) -> OpenSear
     except (boto3.exceptions.Boto3Error, Exception) as e:
         logger.error(f'[AWS CREDS] Failed to get AWS credentials: {str(e)}')
 
-    raise RuntimeError('No valid AWS or basic authentication provided for OpenSearch')
+    # 4. Try no authentication (for local development)
+    logger.info('[NO AUTH] Using no authentication (local development mode)')
+    return OpenSearch(**client_kwargs)
 
 
 def initialize_client(args: baseToolArgs) -> OpenSearch:

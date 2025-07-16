@@ -13,6 +13,28 @@ def main() -> None:
     import argparse
     import asyncio
     import logging
+    import os
+    from pathlib import Path
+    
+    # Load .env file if it exists
+    try:
+        from dotenv import load_dotenv
+        # Look for .env in current directory, parent directory, and src parent directory
+        env_paths = [
+            Path.cwd() / '.env',
+            Path.cwd().parent / '.env',
+            Path(__file__).parent.parent.parent / '.env'
+        ]
+        
+        for env_path in env_paths:
+            if env_path.exists():
+                load_dotenv(env_path)
+                logging.info(f'Loaded environment variables from {env_path}')
+                break
+        else:
+            logging.info('No .env file found, using system environment variables')
+    except ImportError:
+        logging.warning('python-dotenv not installed, using system environment variables only')
 
     # Configure logging
     logging.basicConfig(
