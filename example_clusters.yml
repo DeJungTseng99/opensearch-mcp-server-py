@@ -8,6 +8,11 @@ clusters:
     opensearch_username: "admin"
     opensearch_password: "your_password_here"
 
+  remote-production:
+    opensearch_url: "https://192.168.50.68:8000"
+    opensearch_username: "admin"
+    opensearch_password: "y1qaz@WSX3edc"
+
   remote-cluster:
     opensearch_url: "https://your-opensearch-domain.us-east-2.es.amazonaws.com"
     profile: "your-aws-profile"
