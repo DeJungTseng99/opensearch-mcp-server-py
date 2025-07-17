@@ -6,6 +6,12 @@ import logging
 import os
 from mcp_server_opensearch.clusters_information import ClusterInfo, get_cluster
 from opensearchpy import OpenSearch, RequestsHttpConnection
+import ssl
+import urllib3
+
+# Force disable SSL warnings and verification globally
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+ssl._create_default_https_context = ssl._create_unverified_context
 from requests_aws4auth import AWS4Auth
 from tools.tool_params import baseToolArgs
 from typing import Any, Dict
@@ -104,13 +110,49 @@ def initialize_client_with_cluster(cluster_info: ClusterInfo = None) -> OpenSear
     # Parse the OpenSearch domain URL
     parsed_url = urlparse(opensearch_url)
 
+    # Determine SSL verification setting - cluster config takes precedence over environment
+    verify_certs = True  # Default to True for security
+    if cluster_info and cluster_info.verify_certs is not None:
+        verify_certs = cluster_info.verify_certs
+        logger.info(f'[SSL] Using cluster verify_certs setting: {verify_certs}')
+    else:
+        verify_certs = os.getenv('OPENSEARCH_SSL_VERIFY', 'true').lower() != 'false'
+        logger.info(f'[SSL] Using environment verify_certs setting: {verify_certs}')
+    
+    logger.info(f'[SSL] Final verify_certs setting: {verify_certs} for URL: {opensearch_url}')
+
     # Common client configuration
     client_kwargs: Dict[str, Any] = {
         'hosts': [opensearch_url],
         'use_ssl': (parsed_url.scheme == 'https'),
-        'verify_certs': os.getenv('OPENSEARCH_SSL_VERIFY', 'true').lower() != 'false',
+        'verify_certs': verify_certs,
         'connection_class': RequestsHttpConnection,
     }
+    
+    # Additional SSL configuration when verify_certs is False (equivalent to curl -k)
+    if not verify_certs and parsed_url.scheme == 'https':
+        import ssl
+        import urllib3
+        logger.info('[SSL] Applying SSL bypass configuration (equivalent to curl -k)')
+        
+        # Disable SSL warnings when verification is disabled
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        
+        # For OpenSearch-py 3.0.0, use ssl_assert_hostname and ssl_assert_fingerprint
+        client_kwargs['ssl_assert_hostname'] = False
+        client_kwargs['ssl_assert_fingerprint'] = None
+        
+        # Create SSL context that ignores certificate errors
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+        
+        # Add SSL context to client configuration
+        client_kwargs['ssl_context'] = ssl_context
+        client_kwargs['ssl_show_warn'] = False
+        
+        logger.info(f'[SSL] SSL bypass configuration applied: ssl_context.verify_mode = {ssl_context.verify_mode}')
+        logger.info(f'[SSL] Client kwargs: {list(client_kwargs.keys())}')
 
     session = boto3.Session(profile_name=profile) if profile else boto3.Session()
     if not aws_region:

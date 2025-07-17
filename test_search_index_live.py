@@ -31,64 +31,90 @@ async def test_search_index_tool():
                 await session.initialize()
                 print("✅ Session initialized")
                 
-                # List available tools
+                # Test 1: List available tools
+                print("\n📋 Test 1: List available tools...")
+                # streamibg_server.py 的server.list_tools功能
                 tools_response = await session.list_tools()
                 available_tools = [tool.name for tool in tools_response.tools]
                 print(f"✅ Available tools: {available_tools}")
+                
+                # Show detailed tool information
+                for tool in tools_response.tools:
+                    print(f"  • {tool.name}: {tool.description}")
                 
                 if "SearchIndexTool" not in available_tools:
                     print("❌ SearchIndexTool not available")
                     return
                 
-                # Test 1: List all indices first
-                print("\n🔍 Test 1: List all indices...")
+                # Test 2: List all indices with remote-production cluster
+                print("\n🔍 Test 2: List all indices for remote-production cluster...")
                 if "ListIndexTool" in available_tools:
-                    result = await session.call_tool("ListIndexTool", {})
+                    result = await session.call_tool("ListIndexTool", {
+                        "opensearch_cluster_name": "remote-production"
+                    })
                     print(f"📊 Indices result:")
-                    print(result.content[0].text[:500] + "...")
+                    print(result.content[0].text[:1000] + "...")
                 
-                # Test 2: Basic search on all indices
-                print("\n🔍 Test 2: Basic search on all indices...")
+                # Test 3: Basic search on all indices
+                print("\n🔍 Test 3: Basic search on all indices...")
                 search_params = {
-                    "index": "_all",
-                    "query": {"match_all": {}}
-                }
-                
-                result = await session.call_tool("SearchIndexTool", search_params)
-                print(f"📊 Search result:")
-                print(result.content[0].text[:500] + "...")
-                
-                # Test 3: Search with size limit
-                print("\n🔍 Test 3: Search with limited results...")
-                search_params = {
+                    "opensearch_cluster_name": "remote-production",
                     "index": "_all",
                     "query": {
-                        "match_all": {},
+                        "query": {
+                            "match_all": {}
+                        },
                         "size": 5
                     }
                 }
                 
-                result = await session.call_tool("SearchIndexTool", search_params)
-                print(f"📊 Limited search result:")
-                print(result.content[0].text[:500] + "...")
+                if "SearchIndexTool" in available_tools:
+                    result = await session.call_tool("SearchIndexTool", search_params)
+                    print(f"📊 Search result:")
+                    print(result.content[0].text[:500] + "...")
                 
-                # Test 4: Search system indices
-                print("\n🔍 Test 4: Search system indices...")
+                # Test 4: Search with size limit
+                print("\n🔍 Test 4: Search with limited results...")
                 search_params = {
-                    "index": ".opensearch*",
-                    "query": {"match_all": {}}
+                    "opensearch_cluster_name": "remote-production",
+                    "index": "_all",
+                    "query": {
+                        "query": {
+                            "match_all": {}
+                        },
+                        "size": 5
+                    }
                 }
                 
-                try:
+                if "SearchIndexTool" in available_tools:
                     result = await session.call_tool("SearchIndexTool", search_params)
-                    print(f"📊 System indices result:")
-                    print(result.content[0].text[:300] + "...")
-                except Exception as e:
-                    print(f"⚠️ System indices search failed: {e}")
+                    print(f"📊 Limited search result:")
+                    print(result.content[0].text[:500] + "...")
                 
-                # Test 5: Search with range query
-                print("\n🔍 Test 5: Search with range query...")
+                # Test 5: Search system indices
+                print("\n🔍 Test 5: Search system indices...")
                 search_params = {
+                    "opensearch_cluster_name": "remote-production",
+                    "index": ".opensearch*",
+                    "query": {
+                        "query": {
+                            "match_all": {}
+                        }
+                    }
+                }
+                
+                if "SearchIndexTool" in available_tools:
+                    try:
+                        result = await session.call_tool("SearchIndexTool", search_params)
+                        print(f"📊 System indices result:")
+                        print(result.content[0].text[:300] + "...")
+                    except Exception as e:
+                        print(f"⚠️ System indices search failed: {e}")
+                
+                # Test 6: Search with range query
+                print("\n🔍 Test 6: Search with range query...")
+                search_params = {
+                    "opensearch_cluster_name": "remote-production",
                     "index": "_all",
                     "query": {
                         "bool": {
@@ -108,12 +134,13 @@ async def test_search_index_tool():
                     }
                 }
                 
-                try:
-                    result = await session.call_tool("SearchIndexTool", search_params)
-                    print(f"📊 Range query result:")
-                    print(result.content[0].text[:300] + "...")
-                except Exception as e:
-                    print(f"⚠️ Range query failed: {e}")
+                if "SearchIndexTool" in available_tools:
+                    try:
+                        result = await session.call_tool("SearchIndexTool", search_params)
+                        print(f"📊 Range query result:")
+                        print(result.content[0].text[:300] + "...")
+                    except Exception as e:
+                        print(f"⚠️ Range query failed: {e}")
                 
                 print("\n🎉 SearchIndexTool testing completed successfully!")
                 
@@ -127,7 +154,7 @@ if __name__ == "__main__":
     print("🚀 Starting SearchIndexTool Live Test")
     print("📝 Prerequisites:")
     print("   1. MCP Server running on http://localhost:9900")
-    print("   2. OpenSearch running on http://localhost:9200")
+    print("   2. OpenSearch running on https://192.168.50.68:8000")
     print("   3. Virtual environment activated")
     print()
     

@@ -18,6 +18,7 @@ class ClusterInfo(BaseModel):
     opensearch_password: Optional[str] = None
     profile: Optional[str] = None
     is_serverless: Optional[bool] = None
+    verify_certs: Optional[bool] = None
 
 
 # Global dictionary to store cluster information
