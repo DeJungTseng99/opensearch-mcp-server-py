@@ -26,7 +26,7 @@ def get_index(args: ListIndicesArgs) -> json:
         json: Detailed index information including settings and mappings
     """
     from .client import initialize_client
-
+    # client:連線的opensearch實體
     client = initialize_client(args)
     response = client.indices.get(index=args.index)
     return response
