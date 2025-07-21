@@ -232,4 +232,11 @@ def initialize_client(args: baseToolArgs) -> OpenSearch:
     cluster_info = None
     if args and args.opensearch_cluster_name:
         cluster_info = get_cluster(args.opensearch_cluster_name)
+    else:
+        # If no cluster name specified, use the first available cluster in multi-mode
+        from mcp_server_opensearch.clusters_information import cluster_registry
+        if cluster_registry:
+            first_cluster_name = next(iter(cluster_registry))
+            cluster_info = cluster_registry[first_cluster_name]
+            logger.info(f'No cluster specified, using first available cluster: {first_cluster_name}')
     return initialize_client_with_cluster(cluster_info)

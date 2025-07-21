@@ -53,7 +53,7 @@ async def test_search_index_tool():
                         "opensearch_cluster_name": "remote-production"
                     })
                     print(f"📊 Indices result:")
-                    print(result.content[0].text[:1000] + "...")
+                    print(result.content[0].text[:10000] + "...")
                 
                 # Test 3: Basic search on all indices
                 print("\n🔍 Test 3: Basic search on all indices...")

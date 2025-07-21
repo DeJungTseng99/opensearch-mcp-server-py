@@ -3,10 +3,10 @@ description: "OpenSearch cluster configurations"
 
 
 clusters:
-  local-cluster:
-    opensearch_url: "http://localhost:9200"
-    opensearch_username: "admin"
-    opensearch_password: "your_password_here"
+  # local-cluster:
+  #   opensearch_url: "http://localhost:9200"
+  #   opensearch_username: "admin"
+  #   opensearch_password: "your_password_here"
 
   remote-production:
     opensearch_url: "https://192.168.50.68:8000"
@@ -14,15 +14,15 @@ clusters:
     opensearch_password: "1qaz@WSX3edc"
     verify_certs: false
 
-  remote-cluster:
-    opensearch_url: "https://your-opensearch-domain.us-east-2.es.amazonaws.com"
-    profile: "your-aws-profile"
+  # remote-cluster:
+  #   opensearch_url: "https://your-opensearch-domain.us-east-2.es.amazonaws.com"
+  #   profile: "your-aws-profile"
   
-  remote-cluster-with-iam:
-    opensearch_url: "https://your-opensearch-domain.us-east-2.es.amazonaws.com"
-    iam_arn: "arn:aws:iam::123456789012:role/YourOpenSearchRole"
-    aws_region: "us-east-2"
-    profile: "your-aws-profile"
+  # remote-cluster-with-iam:
+  #   opensearch_url: "https://your-opensearch-domain.us-east-2.es.amazonaws.com"
+  #   iam_arn: "arn:aws:iam::123456789012:role/YourOpenSearchRole"
+  #   aws_region: "us-east-2"
+  #   profile: "your-aws-profile"
 
 
 # Example configurations for different authentication methods:
