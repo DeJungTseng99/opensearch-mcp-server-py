@@ -69,6 +69,8 @@ async def search_index_tool(args: SearchIndexArgs) -> list[dict]:
         check_tool_compatibility('SearchIndexTool', args)
         result = search_index(args)
         formatted_result = json.dumps(result, indent=2)
+        print(f"Received index: {args.index}")
+        print(f"Received query: {args.query}")
 
         return [
             {

@@ -30,7 +30,8 @@ def main():
     env['PYTHONPATH'] = str(src_path)
     
     # Prepare the command
-    venv_python = script_dir / '.venv' / 'bin' / 'python'
+    venv_python = sys.executable
+    # venv_python = script_dir / '.venv' / 'bin' / 'python'
     
     cmd = [
         str(venv_python),
